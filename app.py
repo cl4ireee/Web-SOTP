@@ -14,6 +14,7 @@ JSON_CONFIG_URL = "https://raw.githubusercontent.com/YoshCasaster/verifikasi-sot
 # Variabel untuk kontrol pengiriman
 loop_running = False
 stop_event = threading.Event()
+phone_number = None  # Variabel global untuk nomor telepon
 
 # Fungsi untuk mengirim OTP
 def send_otp_requests(phone_number):
@@ -33,9 +34,8 @@ def send_otp_requests(phone_number):
         return [f"Gagal mengambil konfigurasi OTP: {e}"]
 
 # Fungsi untuk pengiriman berulang
-def send_otp_loop(phone_number):
+def send_otp_loop():
     global loop_running
-    loop_running = True
     while loop_running:
         otp_responses = send_otp_requests(phone_number)
         print(otp_responses)  # Ganti dengan logging jika perlu
@@ -55,17 +55,22 @@ def home():
 
 @app.route('/otp', methods=['POST'])
 def otp():
-    global loop_running
-    phone_number = request.form['phone']
+    global loop_running, phone_number
+    phone_number = request.form['phone']  # Simpan nomor telepon secara global
     if not loop_running:
-        threading.Thread(target=send_otp_loop, args=(phone_number,), daemon=True).start()
-    return redirect(url_for('home'))
+        loop_running = True
+        threading.Thread(target=send_otp_loop, daemon=True).start()
+    return redirect(url_for('otp_status'))
+
+@app.route('/otp-status', methods=['GET'])
+def otp_status():
+    return render_template('home.html', key_valid=True)  # Tampilkan halaman utama tanpa menghilangkan status
 
 @app.route('/stop', methods=['POST'])
 def stop():
     global loop_running
     loop_running = False
-    return redirect(url_for('home'))
+    return redirect(url_for('otp_status'))
 
 if __name__ == '__main__':
     app.run(debug=True)

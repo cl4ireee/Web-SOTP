@@ -18,6 +18,9 @@
             background-color: #f8f9fa;
             border-top: 1px solid #e9ecef;
         }
+        .progress {
+            display: none; /* Sembunyikan progress bar secara default */
+        }
     </style>
 </head>
 <body>
@@ -29,16 +32,47 @@
                 <input type="text" class="form-control" id="phone" name="phone" placeholder="62***** / 0*****" required>
             </div>
             <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-success">Kirim</button>
+                <button type="submit" class="btn btn-success" id="send-btn">Kirim</button>
                 <form method="POST" action="/stop">
                     <button type="submit" class="btn btn-danger">Stop</button>
                 </form>
             </div>
         </form>
+
+        <!-- Progress Bar -->
+        <div class="progress mt-4" id="progress-bar">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" id="progress"></div>
+        </div>
+
+        <div id="status-message" class="mt-2"></div>
     </div>
 
     <footer>
         <p>2024 SOTP | YoshCassaster</p>
     </footer>
+
+    <script>
+        const sendButton = document.getElementById('send-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progress = document.getElementById('progress');
+        const statusMessage = document.getElementById('status-message');
+
+        // Menampilkan progress bar saat pengiriman dimulai
+        document.forms[0].onsubmit = function() {
+            progressBar.style.display = 'block';
+            progress.style.width = '0%';
+            statusMessage.textContent = '';
+
+            let interval = setInterval(() => {
+                let currentWidth = parseInt(progress.style.width);
+                if (currentWidth >= 100) {
+                    clearInterval(interval);
+                    statusMessage.textContent = 'Pengiriman selesai!';
+                    return;
+                }
+                progress.style.width = (currentWidth + 10) + '%'; // Update lebar bar
+            }, 300); // Update setiap 300ms
+        };
+    </script>
 </body>
 </html>

@@ -4,22 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OTP Sender</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #007BFF;
+        }
+        input {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h2>OTP Sender</h2>
-    <form method="POST" action="/otp">
-        <label for="phone">Nomor Telepon:</label>
-        <input type="text" id="phone" name="phone" required>
-        <button type="submit">Kirim OTP</button>
-    </form>
+    <div class="container">
+        <h2>Masukkan Password</h2>
+        <form method="POST" action="/">
+            <input type="password" name="password" required placeholder="Masukkan Password">
+            <button type="submit">Login</button>
+        </form>
 
-    {% if responses %}
-        <h3>Respon OTP:</h3>
-        <ul>
-        {% for response in responses %}
-            <li>{{ response }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
+        {% if key_valid %}
+            <h2>Pengiriman OTP</h2>
+            <form method="POST" action="/otp">
+                <label for="phone">Nomor Telepon:</label>
+                <input type="text" id="phone" name="phone" required placeholder="62***** / 0*****">
+                <button type="submit">Kirim OTP Sekali</button>
+                <button type="submit" name="send_loop" value="true">Kirim OTP Terus Menerus</button>
+            </form>
+            <form method="POST" action="/stop">
+                <button type="submit">Stop Pengiriman OTP</button>
+            </form>
+            {% if responses %}
+                <h3>Respon OTP:</h3>
+                <div class="log-area">
+                    {% for response in responses %}
+                        <div>{{ response }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
 </body>
 </html>

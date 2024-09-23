@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import requests
-import os
+import threading
+import time
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -10,6 +11,10 @@ ALLOWED_PASSWORD = 'Yosepckp'
 
 # URL GitHub Raw untuk file JSON konfigurasi OTP
 JSON_CONFIG_URL = "https://raw.githubusercontent.com/YoshCasaster/verifikasi-sotp/main/otp_config.json"
+
+# Variabel untuk kontrol looping
+loop_running = False
+stop_event = threading.Event()
 
 # Fungsi untuk mengirim OTP
 def send_otp_requests(phone_number):
@@ -43,8 +48,26 @@ def home():
 @app.route('/otp', methods=['POST'])
 def otp():
     phone_number = request.form['phone']
-    otp_responses = send_otp_requests(phone_number)
-    return render_template('home.html', responses=otp_responses)
+    if 'send_loop' in request.form:
+        threading.Thread(target=send_loop, args=(phone_number,), daemon=True).start()
+        return render_template('home.html', key_valid=True)  # Kembali ke halaman utama
+    else:
+        otp_responses = send_otp_requests(phone_number)
+        return render_template('home.html', responses=otp_responses, key_valid=True)
+
+def send_loop(phone_number):
+    global loop_running
+    loop_running = True
+    while loop_running:
+        otp_responses = send_otp_requests(phone_number)
+        # Anda dapat menyimpan respons di suatu tempat jika perlu
+        time.sleep(30)  # Tunggu 30 detik sebelum mengirim OTP lagi
+
+@app.route('/stop', methods=['POST'])
+def stop():
+    global loop_running
+    loop_running = False
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)

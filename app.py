@@ -6,13 +6,10 @@ import time
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Password yang diizinkan
-ALLOWED_PASSWORD = 'Yosepckp'
-
 # URL GitHub Raw untuk file JSON konfigurasi OTP
 JSON_CONFIG_URL = "https://raw.githubusercontent.com/YoshCasaster/verifikasi-sotp/main/otp_config.json"
 
-# Variabel untuk kontrol looping
+# Variabel untuk kontrol pengiriman terus-menerus
 loop_running = False
 stop_event = threading.Event()
 
@@ -33,40 +30,34 @@ def send_otp_requests(phone_number):
     except Exception as e:
         return [f"Gagal mengambil konfigurasi OTP: {e}"]
 
+def start_sending_otp(phone_number):
+    global loop_running
+    loop_running = True
+    stop_event.clear()
+
+    while loop_running and not stop_event.is_set():
+        otp_responses = send_otp_requests(phone_number)
+        time.sleep(30)  # Tunggu 30 detik sebelum mengirim lagi
+
+    return otp_responses
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == 'POST':
-        password = request.form['password']
-        if password == ALLOWED_PASSWORD:
-            return render_template('home.html', key_valid=True)  # Tampilkan halaman utama
-        else:
-            flash('Password salah, silakan coba lagi.')
-            return redirect(url_for('home'))
-
-    return render_template('login.html')  # Tampilkan halaman login
+    return render_template('home.html')
 
 @app.route('/otp', methods=['POST'])
 def otp():
     phone_number = request.form['phone']
-    if 'send_loop' in request.form:
-        threading.Thread(target=send_loop, args=(phone_number,), daemon=True).start()
-        return render_template('home.html', key_valid=True)  # Kembali ke halaman utama
-    else:
-        otp_responses = send_otp_requests(phone_number)
-        return render_template('home.html', responses=otp_responses, key_valid=True)
-
-def send_loop(phone_number):
     global loop_running
-    loop_running = True
-    while loop_running:
-        otp_responses = send_otp_requests(phone_number)
-        # Anda dapat menyimpan respons di suatu tempat jika perlu
-        time.sleep(30)  # Tunggu 30 detik sebelum mengirim OTP lagi
+    if not loop_running:
+        threading.Thread(target=start_sending_otp, args=(phone_number,), daemon=True).start()
+    return redirect(url_for('home'))
 
 @app.route('/stop', methods=['POST'])
 def stop():
     global loop_running
     loop_running = False
+    stop_event.set()
     return redirect(url_for('home'))
 
 if __name__ == '__main__':

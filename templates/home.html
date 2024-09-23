@@ -3,51 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OTP Sender</title>
+    <title>Home</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            margin-bottom: 60px; /* Untuk memberi ruang footer */
-        }
-        footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            text-align: center;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-        }
-    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center">Kirim OTP</h1>
+        <h2>Pengiriman OTP</h2>
         <form method="POST" action="/otp">
             <div class="form-group">
-                <label for="phone">Nomor Telepon:</label>
-                <input type="text" class="form-control" id="phone" name="phone" placeholder="62***** / 0*****" required>
+                <label>Nomor Telepon</label>
+                <input type="text" name="phone" class="form-control" required>
             </div>
-            <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-success" name="send_loop">Kirim (Terus Menerus)</button>
-                <form method="POST" action="/stop">
-                    <button type="submit" class="btn btn-danger">Stop</button>
-                </form>
-            </div>
+            <button type="submit" name="send_loop" class="btn btn-success">Kirim</button>
+            <a href="/stop" class="btn btn-danger">Stop</a>
         </form>
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                <div class="alert alert-info mt-3">
+                <div class="alert alert-warning mt-3">
                     {% for message in messages %}
-                        <p>{{ message }}</p>
+                        {{ message }}<br>
                     {% endfor %}
                 </div>
             {% endif %}
         {% endwith %}
+        <footer class="mt-5">
+            <p>&copy; 2024 SOTP | YoshCassaster</p>
+        </footer>
     </div>
-
-    <footer>
-        <p>2024 SOTP | YoshCassaster</p>
-    </footer>
 </body>
 </html>

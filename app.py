@@ -14,7 +14,6 @@ JSON_CONFIG_URL = "https://raw.githubusercontent.com/YoshCasaster/verifikasi-sot
 
 # Variabel untuk kontrol looping
 loop_running = False
-stop_event = threading.Event()
 
 # Fungsi untuk mengirim OTP
 def send_otp_requests(phone_number):
@@ -53,18 +52,19 @@ def otp():
     if 'send_loop' in request.form:
         if not loop_running:  # Cek apakah loop sudah berjalan
             threading.Thread(target=send_loop, args=(phone_number,), daemon=True).start()
-        flash('Pengiriman OTP terus menerus dimulai.')
+            flash('Pengiriman OTP terus menerus dimulai.')
     else:
         otp_responses = send_otp_requests(phone_number)
         flash('OTP telah terkirim: ' + ', '.join(otp_responses))
 
-    return redirect(url_for('home'))
+    return redirect(url_for('home'))  # Pastikan kembali ke halaman home
 
 def send_loop(phone_number):
     global loop_running
     loop_running = True
     while loop_running:
         otp_responses = send_otp_requests(phone_number)
+        # Simpan atau tampilkan respons jika perlu
         time.sleep(30)  # Tunggu 30 detik sebelum mengirim OTP lagi
 
 @app.route('/stop', methods=['POST'])

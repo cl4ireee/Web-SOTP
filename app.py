@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Password yang diizinkan
-ALLOWED_PASSWORD = 'Yosepckp'
+ALLOWED_PASSWORD = 'cl4ire'
 
 # URL GitHub Raw untuk file JSON konfigurasi OTP
 JSON_CONFIG_URL = "https://raw.githubusercontent.com/YoshCasaster/verifikasi-sotp/main/otp_config.json"
